@@ -9,4 +9,8 @@ Mpala\ GIS/*.zip
 */*/*.tif
 */*/*/*.tif
 !MODUS\ Data/Recent/*.tif
-
+Trash
+*/Trash
+*/*/Trash
+*/*/*/Trash
+*/*/*/*/Trash
