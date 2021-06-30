@@ -1,0 +1,12 @@
+.DS_Store
+*.zip
+*/*.zip
+*/*/*.zip
+*/*/*/*.zip
+Mpala\ GIS/*.zip
+*.tif
+*/*.tif
+*/*/*.tif
+*/*/*/*.tif
+!MODUS\ Data/Recent/*.tif
+

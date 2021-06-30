@@ -1,0 +1,16 @@
+<PAMDataset>
+  <Metadata>
+    <MDI key="add_offset">0</MDI>
+    <MDI key="scale_factor">0.0001</MDI>
+    <MDI key="units">NDVI</MDI>
+  </Metadata>
+  <PAMRasterBand band="1">
+    <Metadata>
+      <MDI key="STATISTICS_MAXIMUM">6674</MDI>
+      <MDI key="STATISTICS_MEAN">4421.4909513961</MDI>
+      <MDI key="STATISTICS_MINIMUM">2304</MDI>
+      <MDI key="STATISTICS_STDDEV">645.80154989899</MDI>
+      <MDI key="STATISTICS_VALID_PERCENT">59.51</MDI>
+    </Metadata>
+  </PAMRasterBand>
+</PAMDataset>

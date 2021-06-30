@@ -1,0 +1,16 @@
+<PAMDataset>
+  <Metadata>
+    <MDI key="add_offset">0</MDI>
+    <MDI key="scale_factor">0.0001</MDI>
+    <MDI key="units">EVI</MDI>
+  </Metadata>
+  <PAMRasterBand band="1">
+    <Metadata>
+      <MDI key="STATISTICS_MAXIMUM">4862</MDI>
+      <MDI key="STATISTICS_MEAN">2608.110910031</MDI>
+      <MDI key="STATISTICS_MINIMUM">1176</MDI>
+      <MDI key="STATISTICS_STDDEV">512.04344847691</MDI>
+      <MDI key="STATISTICS_VALID_PERCENT">59.51</MDI>
+    </Metadata>
+  </PAMRasterBand>
+</PAMDataset>

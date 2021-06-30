@@ -1,0 +1,8 @@
+Value,MODLAND,VI Usefulness,Aerosol Quantity,Adjacent cloud detected,Atmosphere BRDF Correction,Mixed Clouds,Land/Water Mask,Possible snow/ice,Possible shadow
+2116,VI produced with good quality,Lower quality,Low,No,No,No,Land (Nothing else but land),No,No
+2120,VI produced with good quality,Decreasing quality,Low,No,No,No,Land (Nothing else but land),No,No
+2185,"VI produced, but check other QA",Decreasing quality,Average,No,No,No,Land (Nothing else but land),No,No
+2189,"VI produced, but check other QA",Decreasing quality,Average,No,No,No,Land (Nothing else but land),No,No
+2257,"VI produced, but check other QA",Decreasing quality,High,No,No,No,Land (Nothing else but land),No,No
+2261,"VI produced, but check other QA",Decreasing quality,High,No,No,No,Land (Nothing else but land),No,No
+2445,"VI produced, but check other QA",Decreasing quality,Average,Yes,No,No,Land (Nothing else but land),No,No
