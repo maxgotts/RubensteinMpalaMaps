@@ -32,7 +32,7 @@ lat_line <- 0.409859
 Habitat <- filter(Habitat, !is.na(Habitat), Habitat!=0, Latitude>=lat_line)
 
 # Replace integer with string
-bush <- data.frame(inp=0:3,out=c(NA,"OB","LB","MB"))
+bush <- data.frame(inp=0:3,out=c(NA,"OG","LB","MB"))
 Habitat$Habitat <- find_replace(Habitat$Habitat, bush)
 
 # Add NDVI

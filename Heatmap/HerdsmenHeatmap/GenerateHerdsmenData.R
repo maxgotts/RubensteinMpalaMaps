@@ -14,21 +14,21 @@ lastmon <- function(x) lastDay(x,4)
 lasttue <- function(x) lastDay(x,5)
 lastwed <- function(x) lastDay(x,6)
 lastthur <- function(x) lastDay(x,7)
+yesterday <- function() as.Date(as.numeric(today()) - 1)
 
+lastlastwed <- function(x) lastDay(x,6+7)
 lastlastfri <- function(x) lastDay(x,1+7)
 
 df <- read.csv("/Users/maxgotts/Desktop/MPALA/Whitesheets/ConvertedWhitesheets.csv")
 
 if (weekdays(today()) %in% c("Monday")) {
   from.date <- lastfri(today())
-} else if (weekdays(today()) %in% c("Thursday")) {
+} else if (weekdays(today()) %in% c("Thrsday")) {
   from.date <- lasttue(today())
 } else {
   cat("Warning: you are running this program outside of its specified date\n")
-  from.date <- lastfri(ymd("2021-06-28"))
+  from.date <- lastfri(today()) #lastwed(yesterday())
 }
-
-from.date <- lastwed(today())
 
 # from.days <- time_length(interval(ymd("2021-01-01"),from.date), "day")
 # df$NumberDays <- time_length(interval(ymd("2021-01-01"),mdy(df$Date)), "day")
@@ -66,8 +66,8 @@ write.csv(recents.zebras,"/Users/maxgotts/Desktop/MPALA/Maps/Heatmap/HerdsmenHea
 
 ## Move most recent NDVI
 
-file.copy("/Users/maxgotts/Desktop/MPALA/Maps/MODUS\ Data/Recent/NDVI.tif", "/Users/maxgotts/Desktop/MPALA/Maps/Heatmap/HerdsmenHeatmap/Rasters/NDVI.tif", overwrite=TRUE)
-file.copy("/Users/maxgotts/Desktop/MPALA/Maps/MODUS\ Data/Recent/EVI.tif", "/Users/maxgotts/Desktop/MPALA/Maps/Heatmap/HerdsmenHeatmap/Rasters/EVI.tif", overwrite=TRUE)
+# file.copy("/Users/maxgotts/Desktop/MPALA/Maps/MODUS\ Data/Recent/NDVI.tif", "/Users/maxgotts/Desktop/MPALA/Maps/Heatmap/HerdsmenHeatmap/Rasters/NDVI.tif", overwrite=TRUE)
+# file.copy("/Users/maxgotts/Desktop/MPALA/Maps/MODUS\ Data/Recent/EVI.tif", "/Users/maxgotts/Desktop/MPALA/Maps/Heatmap/HerdsmenHeatmap/Rasters/EVI.tif", overwrite=TRUE)
 
 
 
