@@ -21,14 +21,16 @@ lastlastfri <- function(x) lastDay(x,1+7)
 
 df <- read.csv("/Users/maxgotts/Desktop/MPALA/Whitesheets/ConvertedWhitesheets.csv")
 
-if (weekdays(today()) %in% c("Monday")) {
-  from.date <- lastfri(today())
-} else if (weekdays(today()) %in% c("Thrsday")) {
-  from.date <- lasttue(today())
-} else {
-  cat("Warning: you are running this program outside of its specified date\n")
-  from.date <- lastfri(today()) #lastwed(yesterday())
-}
+# if (weekdays(today()) %in% c("Monday")) {
+#   from.date <- lastfri(today())
+# } else if (weekdays(today()) %in% c("Thursday")) {
+#   from.date <- lasttue(today())
+# } else {
+#   cat("Warning: you are running this program outside of its specified date\n")
+#   from.date <- lastfri(today()) #lastwed(yesterday())
+# }
+
+from.date <- lastwed(today())
 
 # from.days <- time_length(interval(ymd("2021-01-01"),from.date), "day")
 # df$NumberDays <- time_length(interval(ymd("2021-01-01"),mdy(df$Date)), "day")
