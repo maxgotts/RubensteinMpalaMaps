@@ -30,7 +30,7 @@ for (date_id in 1:nrow(dates)) {
   date_range_mod <- gsub("-","_",date_range)
   
   # Add NDVI
-  NDVI_raster <- raster(paste0("/Users/maxgotts/Desktop/MPALA/VI Data/mpala-NDVI-",date_range,".tif"))
+  NDVI_raster <- raster(paste0("/Users/maxgotts/Desktop/MPALA/VI Data/range/mpala-NDVI-",date_range,".tif"))
   NDVI <- as.data.frame(NDVI_raster, xy = TRUE)
   colnames(NDVI) <- c("Longitude","Latitude","NDVI")
   NDVI <- filter(NDVI, Latitude>=lat_line) #!is.na(NDVI)
@@ -46,7 +46,7 @@ for (date_id in 1:nrow(dates)) {
         "difference:",length(setdiff(rownames(Habitat),rownames(NDVI))),"\n")
   }
   
-  EVI_raster <- raster(paste0("/Users/maxgotts/Desktop/MPALA/VI Data/mpala-EVI-",start,"-",end,".tif"))
+  EVI_raster <- raster(paste0("/Users/maxgotts/Desktop/MPALA/VI Data/range/mpala-EVI-",start,"-",end,".tif"))
   EVI <- as.data.frame(EVI_raster, xy = TRUE)
   colnames(EVI) <- c("Longitude","Latitude","EVI")
   EVI <- filter(EVI, Latitude>=lat_line) #!is.na(EVI)
