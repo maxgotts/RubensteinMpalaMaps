@@ -1,0 +1,239 @@
+// Mpala shapefile import
+var MpalaImport = ee.FeatureCollection("users/maxgotts/MpalaROI");
+var coords = MpalaImport.first().geometry().coordinates().get(0);
+var roi = ee.Geometry.Polygon(coords);
+Map.addLayer(roi, {}, 'Mpala Research Area');
+Map.centerObject(roi, 11); // Change amount zoomed in
+
+/**
+ * Create a Landsat 8 surface reflectance collection, filter by location and date
+ */
+
+
+// Landsat 8 SR collection id
+var collectionId = "LANDSAT/LC08/C01/T1_SR";
+
+
+// Date prototype
+// Thank you to https://stackoverflow.com/questions/563406/add-days-to-javascript-date
+// Date.prototype.addDays = function(days) {
+//   var date = new Date(this);
+//   date.setDate(date.getDate() + days);
+//   return date;
+// };
+
+// print(new Date(Date.parse('2001-05-31')).addDays(1).toString())
+
+
+
+// String.prototype.padZeros = function() {
+//     if (this.length == 1) {
+//       return '0'+this;
+//     } else if (this.length == 2) {
+//       return this;
+//     } else {
+//       return -1;
+//     }
+// }
+
+
+
+
+
+// Create date variables
+var startDates = ['05-13','06-04','06-16']
+var endDates = ['06-04','06-15',]
+
+var dateIndex = 2; // Indexes from 1 because otherwise it's too hard
+var startDate = startDates[dateIndex-1];
+var endDate = endDates[dateIndex-1];
+
+
+// Real
+// 05-13  06-03
+// 06-04  06-15
+
+
+// Intended
+// 05-25	06-09
+// 06-10	06-25
+// 06-26	07-11
+// 07-12	07-27
+// 07-28	08-12
+// 07-13	07-28
+// 07-29	08-13
+// 08-14	08-29
+// 08-30	09-01
+
+
+
+
+
+
+// Create a collection filtering by ROI and date
+var collection = ee.ImageCollection(collectionId)
+    .filterBounds(roi)
+    .filterDate('2021-'+startDate, '2021-'+endDate);
+    // .clip(roi);
+
+// prints the collection structure
+print('Initial collection:', collection);
+
+
+// Filter images with less than 50% of cloud cover
+collection = collection
+    .filterMetadata('CLOUD_COVER', 'less_than', 50);
+
+// prints the collection structure
+print('Images with less than 50% of cloud cover:', collection);
+
+
+var bandNames = ['B2','B3','B4','B5','B6','B7','pixel_qa'];
+
+// Select bands of interest
+collection = collection.select(bandNames);
+
+// prints the collection structure
+print('Images with selected bands:', collection);
+
+
+// Set a visualization parameters object
+var visParams = {
+    bands: ['B6', 'B5', 'B4'],
+    gain: [0.08,0.06,0.2]
+};
+
+// Add collection to map
+Map.addLayer(collection, visParams, 'collection');
+
+
+var cloudMasking = function (image) {
+
+    var qaBand = image.select(['pixel_qa']);
+
+    var cloud = qaBand.bitwiseAnd(Math.pow(2, 5)).not(); 
+    var shadow = qaBand.bitwiseAnd(Math.pow(2, 3)).not(); 
+    
+    image = image.updateMask(cloud);
+    image = image.updateMask(shadow);
+    
+    return image;
+};
+
+
+var collectionWithoutClouds = collection.map(cloudMasking);
+print('Collection without clouds:', collectionWithoutClouds);
+
+
+var computeNDVI = function (image) {
+
+	var exp = '( b("B5") - b("B4") ) / ( b("B5") + b("B4") )';
+
+	var ndvi = image.expression(exp).rename("ndvi");
+
+	return image.addBands(ndvi);
+};
+
+
+var computeNDWI = function (image) {
+
+	var exp = 'float(b("B5") - b("B6"))/(b("B5") + b("B6"))';
+
+	var ndwi = image.expression(exp).rename("ndwi");
+
+	return image.addBands(ndwi);
+};
+
+
+var computeEVI = function (image) {
+
+	var exp = '2.5 * ((b("B5") - b("B4")) / (b("B5") + 6 * b("B4") - 7.5 * b("B2") + 1))';
+
+	var evi = image.expression(exp).rename("evi");
+
+	return image.addBands(evi);
+
+};
+
+
+
+// For each image, apply the functions computeNDVI, computeNDWI and computeEVI.
+var collectionWithIndexes = collectionWithoutClouds
+    .map(computeNDVI)
+    .map(computeNDWI)
+    .map(computeEVI);
+print('collection with indexes:', collectionWithIndexes);
+    
+
+// Generate mean, median, minimum and maximum mosaics.
+var median = collectionWithIndexes.reduce(ee.Reducer.median());
+var minimum = collectionWithIndexes.reduce(ee.Reducer.min());
+var maximum = collectionWithIndexes.reduce(ee.Reducer.max());
+var mean = collectionWithIndexes.reduce(ee.Reducer.mean());
+
+// Merges the mean, median, minimum and maximum mosaics
+var mosaic = median.addBands(minimum).addBands(maximum).addBands(mean);
+print("All bands mosaic", mosaic);
+
+
+// Separate NDVI and EVI
+var NDVI = mosaic.select('ndvi_mean');
+var EVI = mosaic.select('evi_mean');
+
+// Sets a visualization parameter object to NDVI median
+var visNdvi = {
+    bands: ['ndvi_mean'],
+    min: 0,
+    max: 1,
+    palette: 'ff0000,ffff00,00aa00',
+    format: 'png'
+};
+var visEvi = {
+    bands: ['evi_mean'],
+    min: 0,
+    max: 1,
+    palette: 'ff0000,ffff00,00aa00',
+    format: 'png'
+};
+
+// Add NDVI, EVI mosaic to map
+Map.addLayer(NDVI, visNdvi, 'NDVI mean mosaic');
+Map.addLayer(EVI, visEvi, 'EVI mean mosaic');
+
+
+Export.image.toDrive({
+    image: NDVI, 
+    description: 'mpala-NDVI-'+startDate+'-'+endDate, 
+    fileNamePrefix: 'mpala-NDVI-'+startDate+'-'+endDate, 
+    folder: 'Mpala VI',
+    region: roi, 
+    scale: 30, 
+    maxPixels: 1e13
+});
+
+Export.image.toDrive({
+    image: EVI, 
+    description: 'mpala-EVI-'+startDate+'-'+endDate, 
+    fileNamePrefix: 'mpala-EVI-'+startDate+'-'+endDate, 
+    folder: 'Mpala VI',
+    region: roi, 
+    scale: 30, 
+    maxPixels: 1e13
+});
+//*/
+
+
+
+
+
+
+
+
+
+
+/* Archived stuff
+// var startDateNumeric = new Date(Date.parse('2021-'+startDate));
+// var endDateNumeric = startDateNumeric.addDays(16);
+// var endDate = endDateNumeric.getMonth().toString().padZeros()+'-'+endDateNumeric.getDate().toString().padZeros()
+// print(startDate,endDate)
+*/

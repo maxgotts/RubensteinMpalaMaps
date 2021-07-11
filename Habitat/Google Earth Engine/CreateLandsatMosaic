@@ -1,16 +1,39 @@
+/**** Start of imports. If edited, may not auto-convert in the playground. ****/
+var roi = 
+    /* color: #d63000 */
+    /* shown: false */
+    ee.Geometry.Polygon(
+        [[[36.264839158419676, 0.7732145070333932],
+          [36.017646775607176, 0.3942065471281165],
+          [36.292304978732176, -0.15510655953050995],
+          [36.951484666232176, -0.5780705743199892],
+          [37.440376267794676, -0.11116136674322485],
+          [37.462348924044676, 0.5150523297301858],
+          [37.050361619357176, 0.9379909980508927],
+          [36.391181931857176, 0.8940513027827204]]]),
+    mpala_camp = 
+    /* color: #d63000 */
+    /* shown: false */
+    ee.Geometry.Polygon(
+        [[[36.89713876368166, 0.29323776370778815],
+          [36.897782493845234, 0.2909632800214523],
+          [36.900293041483174, 0.2902122711562234],
+          [36.90085094095827, 0.2924438402092148],
+          [36.9006578219092, 0.2947826957597306],
+          [36.89887683512331, 0.2956839060244452]]]);
+/***** End of imports. If edited, may not auto-convert in the playground. *****/
 /**
  * Create a Landsat 8 surface reflectance collection, filter by location and date
  */
 
-// var roi
 
 // Landsat 8 SR collection id
-var collectionId = "LANDSAT/LC08/C01/T1_SR";
+var collectionId = "LANDSAT/LC08/C01/T1_SR"; //"SKYSAT/GEN-A/PUBLIC/ORTHO/MULTISPECTRAL";
 
 // Create a collection filtering by ROI and date
 var collection = ee.ImageCollection(collectionId)
     .filterBounds(roi)
-    .filterDate('2021-05-01', '2021-06-29');
+    .filterDate('2021-05-01', '2021-06-29');//.filterDate('2005-05-01', '2021-06-29');//
 
 // prints the collection structure
 print('Initial collection:', collection);
@@ -172,8 +195,8 @@ Map.addLayer(mosaic, visNdvi, 'NDVI median mosaic');
 // Export the mosaic to your asset
 Export.image.toAsset({
     image: mosaic,
-    description: 'mpala-2021-summer',
-    assetId: 'mpala-2021-summer',
+    description: 'mpala-2021-summer-highres',
+    assetId: 'mpala-2021-summer-highres',
     pyramidingPolicy: { '.default': 'mean' },
     region: roi,
     scale: 30,

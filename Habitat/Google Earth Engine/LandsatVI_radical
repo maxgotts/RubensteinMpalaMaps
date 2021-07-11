@@ -1,0 +1,131 @@
+// Mpala shapefile import
+var MpalaImport = ee.FeatureCollection("users/maxgotts/MpalaROI");
+var coords = MpalaImport.first().geometry().coordinates().get(0);
+var roi = ee.Geometry.Polygon(coords);
+Map.addLayer(roi, {}, 'Mpala Research Area');
+Map.centerObject(roi, 11); // Change amount zoomed in
+
+/**
+ * Create a Landsat 8 surface reflectance collection, filter by location and date
+ */
+
+
+// Landsat 8 SR collection id
+var collectionId = "LANDSAT/LC08/C01/T1_SR";
+
+
+// Create date variables
+var startDate = '05-01';
+var endDate = '08-01';
+
+// Create a collection filtering by ROI and date
+var collection = ee.ImageCollection(collectionId)
+    .filterBounds(roi)
+    .filterDate('2021-'+startDate, '2021-'+endDate);
+
+// prints the collection structure
+print('Initial collection:', collection);
+
+// Filter images with less than 50% of cloud cover
+collection = collection
+    .filterMetadata('CLOUD_COVER', 'less_than', 50);
+
+// prints the collection structure
+print('Images with less than 50% of cloud cover:', collection);
+
+
+var bandNames = ['B2','B3','B4','B5','B6','B7','pixel_qa'];
+
+// Select bands of interest
+collection = collection.select(bandNames);
+
+// prints the collection structure
+print('Images with selected bands:', collection);
+
+
+// Set a visualization parameters object
+var visParams = {
+    bands: ['B6', 'B5', 'B4'],
+    gain: [0.08,0.06,0.2]
+};
+
+// Add collection to map
+Map.addLayer(collection, visParams, 'collection');
+
+var cloudMasking = function (image) {
+    var qaBand = image.select(['pixel_qa']);
+    var cloud = qaBand.bitwiseAnd(Math.pow(2, 5)).not(); 
+    var shadow = qaBand.bitwiseAnd(Math.pow(2, 3)).not(); 
+    image = image.updateMask(cloud);
+    image = image.updateMask(shadow);
+    return image;
+};
+
+var collectionWithoutClouds = collection.map(cloudMasking);
+
+var computeNDVI = function (image) {
+	var exp = '( b("B5") - b("B4") ) / ( b("B5") + b("B4") )';
+	var ndvi = image.expression(exp).rename("ndvi");
+	return image.addBands(ndvi);
+};
+
+var computeNDWI = function (image) {
+	var exp = 'float(b("B5") - b("B6"))/(b("B5") + b("B6"))';
+	var ndwi = image.expression(exp).rename("ndwi");
+	return image.addBands(ndwi);
+};
+
+
+var computeEVI = function (image) {
+	var exp = '2.5 * ((b("B5") - b("B4")) / (b("B5") + 6 * b("B4") - 7.5 * b("B2") + 1))';
+	var evi = image.expression(exp).rename("evi");
+	return image.addBands(evi);
+};
+
+
+
+// For each image, apply the functions computeNDVI, computeNDWI and computeEVI.
+var collectionWithIndexes = collectionWithoutClouds
+    .map(computeNDVI)
+    .map(computeNDWI)
+    .map(computeEVI);
+print('collection with indexes:', collectionWithIndexes);
+
+    
+// Thank you to https://gis.stackexchange.com/questions/307206/use-google-earth-engine-to-stack-ndvi-timeseries-layers-into-one-image-and-expor
+// Export NDVI and EVI for each collection
+var list=collectionWithIndexes.toList(1000);
+for (var i=0;i<list.length().getInfo();i++){
+  var batch=ee.Image(list.get(i));
+  var date=batch.date().format('MM-dd').getInfo();
+  var ndvi_name='mpala-NDVI-'+date;
+  
+  var wgs84 = ee.Projection('EPSG:4326').atScale(30);
+  
+  print("Exporting "+ndvi_name);
+  // Export NDVI        
+  Export.image.toDrive({ 
+   image: batch.reproject(wgs84).select('ndvi'),
+   description: ndvi_name,
+   fileNamePrefix: ndvi_name,
+   folder: 'Mpala VI',
+   scale: 30,
+   region:roi,
+   maxPixels: 1e13
+  });
+ 
+  // Export EVI
+  var evi_name='mpala-EVI-'+date;
+  print("Exporting "+evi_name);
+  Export.image.toDrive({ 
+   image: batch.reproject(wgs84).select('evi'),
+   description: evi_name,
+   fileNamePrefix: evi_name,
+   folder: 'Mpala VI',
+   scale: 30,
+   region:roi,
+   maxPixels: 1e13
+  });
+};
+
+//*/
