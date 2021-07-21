@@ -30,7 +30,7 @@ df <- read.csv("/Users/maxgotts/Desktop/MPALA/Whitesheets/ConvertedWhitesheets.c
 #   from.date <- lastfri(today()) #lastwed(yesterday())
 # }
 
-from.date <- lastwed(today())
+from.date <- lastwed(yesterday())
 
 # from.days <- time_length(interval(ymd("2021-01-01"),from.date), "day")
 # df$NumberDays <- time_length(interval(ymd("2021-01-01"),mdy(df$Date)), "day")
