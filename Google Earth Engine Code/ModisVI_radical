@@ -1,0 +1,66 @@
+// Mpala shapefile import
+var MpalaImport = ee.FeatureCollection("users/maxgotts/MpalaROI");
+var coords = MpalaImport.first().geometry().coordinates().get(0);
+var roi = ee.Geometry.Polygon(coords);
+Map.addLayer(roi, {}, 'Mpala Research Area');
+Map.centerObject(roi, 11); // Change amount zoomed in
+
+/**
+ * Create a Landsat 8 surface reflectance collection, filter by location and date
+ */
+
+
+// Landsat 8 SR collection id
+var collectionId = "MODIS/006/MOD13Q1";
+
+
+// Create date variables
+var startDate = '05-01';
+var endDate = '08-01';
+
+// Create a collection filtering by ROI and date
+var collection = ee.ImageCollection(collectionId)
+    .filterBounds(roi)
+    .filterDate('2021-'+startDate, '2021-'+endDate);
+
+// prints the collection structure
+print('Initial collection:', collection);
+
+    
+// Thank you to https://gis.stackexchange.com/questions/307206/use-google-earth-engine-to-stack-ndvi-timeseries-layers-into-one-image-and-expor
+// Export NDVI and EVI for each collection
+var list=collection.toList(1000);
+for (var i=0;i<list.length().getInfo();i++){
+  var batch=ee.Image(list.get(i));
+  var date=batch.date().format('MM-dd').getInfo();
+  var ndvi_name='mpala-NDVI-'+date;
+  
+  var wgs84 = ee.Projection('EPSG:4326').atScale(30);
+  
+  print("Exporting "+ndvi_name);
+  // Export NDVI        
+  Export.image.toDrive({ 
+   image: batch.reproject(wgs84).select('NDVI'),
+   description: ndvi_name,
+   fileNamePrefix: ndvi_name,
+   folder: 'Mpala VI',
+   scale: 30,
+   region:roi,
+   maxPixels: 1e13
+  });
+ 
+  // Export EVI
+  var evi_name='mpala-EVI-'+date;
+  print("Exporting "+evi_name);
+  Export.image.toDrive({ 
+   image: batch.reproject(wgs84).select('EVI'),
+   description: evi_name,
+   fileNamePrefix: evi_name,
+   folder: 'Mpala VI',
+   scale: 30,
+   region:roi,
+   maxPixels: 1e13
+  });
+};
+
+//*/
